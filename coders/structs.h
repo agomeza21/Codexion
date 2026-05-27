@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/27 17:17:25 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/27 18:48:16 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@
 # include <stdlib.h>
 # include <string.h>
 # include <pthread.h>
+# include <sys/time.h>
+# include <unistd.h>
 
 typedef struct s_params
 {
@@ -37,6 +39,7 @@ typedef struct s_coder
     pthread_t   thread;
 }   t_coder;
 
-void create_coders(t_coder *coders, t_params *params);
+void	create_coders(t_coder *coders, t_params *params);
+long	calculate_time(void);
 
 #endif

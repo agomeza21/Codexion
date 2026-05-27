@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/27 16:44:37 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/27 18:47:55 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,8 @@ int	main(int argc, char **argv)
 {
 	t_params	params;
 	t_coder		*coders;
+	/* long		t1;
+	long		t2; */
 
 	if (argc != 9)
 	{
@@ -107,5 +109,9 @@ int	main(int argc, char **argv)
 		return (1);
 	coders = malloc(sizeof(t_coder) * params.number_of_coders);
 	create_coders(coders, &params);
+	/* t1 = calculate_time();
+	usleep(1000000);
+	t2 = calculate_time();
+	printf("%ld\n", t2 - t1); */
 	return (0);
 }

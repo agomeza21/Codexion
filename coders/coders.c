@@ -1,5 +1,13 @@
 #include "structs.h"
 
+long	calculate_time(void)
+{
+	struct timeval	tv;
+
+	gettimeofay(&tv, NULL);
+	return ((long)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
+}
+
 static void *func(void *arg)
 {
 	t_coder *coder;
