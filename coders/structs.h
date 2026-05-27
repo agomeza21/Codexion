@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/27 16:22:06 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/27 17:17:25 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,5 +29,14 @@ typedef struct s_params
     int     dongle_cooldown;
     int     scheduler;
 }   t_params;
+
+typedef struct s_coder
+{
+    int         id;
+    t_params    *params;
+    pthread_t   thread;
+}   t_coder;
+
+void create_coders(t_coder *coders, t_params *params);
 
 #endif
