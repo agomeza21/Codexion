@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/27 18:48:16 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/27 18:50:05 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -38,6 +38,14 @@ typedef struct s_coder
     t_params    *params;
     pthread_t   thread;
 }   t_coder;
+
+typedef struct s_dongle
+{
+	int				in_use;
+	long			release_time;
+	pthread_mutex_t	mutex;
+	pthread_cond_t	cond;
+}	t_dongle;
 
 void	create_coders(t_coder *coders, t_params *params);
 long	calculate_time(void);
