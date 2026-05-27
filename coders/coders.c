@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   coders.c                                           :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
+/*   Updated: 2026/05/27 18:52:26 by agomez-a         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "structs.h"
 
 long	calculate_time(void)
@@ -8,18 +20,18 @@ long	calculate_time(void)
 	return ((long)(tv.tv_sec * 1000 + tv.tv_usec / 1000));
 }
 
-static void *func(void *arg)
+static void	*func(void *arg)
 {
-	t_coder *coder;
+	t_coder	*coder;
 
 	coder = (t_coder *)arg;
 	printf("%d\n", coder->id);
-	return NULL;
+	return (NULL);
 }
 
-void create_coders(t_coder *coders, t_params *params)
+void	create_coders(t_coder *coders, t_params *params)
 {
-	int i;
+	int	i;
 
 	i = 0;
 	while (i < params->number_of_coders)
