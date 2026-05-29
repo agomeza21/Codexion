@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/29 13:40:37 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/29 14:39:45 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,6 +19,8 @@
 # include <pthread.h>
 # include <sys/time.h>
 # include <unistd.h>
+
+typedef struct s_sim t_sim;
 
 typedef struct s_params
 {
@@ -43,14 +45,25 @@ typedef struct s_dongle
 typedef struct s_coder
 {
 	int			id;
+	int			compile_count;
 	long		start_time;
-	t_params	*params;
+	long		last_compile_start;
+	t_sim		*sim;
 	pthread_t	thread;
 	t_dongle	*left;
 	t_dongle	*right;
 }	t_coder;
 
-void	create_coders(t_coder *coders, t_dongle *dongles, t_params *params);
+typedef struct s_sim
+{
+	pthread_mutex_t	log_mutex;
+	t_params		params;
+	t_coder			*coders;
+	t_dongle		*dongles;
+	int				running;
+}	t_sim;
+
+void	create_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
 void    take_dongle(t_dongle *dongle, t_coder *coder);
 void    create_dongles(t_dongle *dongles, int n);
 void    release_dongle(t_dongle *dongle);

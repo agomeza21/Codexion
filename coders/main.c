@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/29 13:09:50 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/29 14:48:26 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -93,9 +93,7 @@ int	parse_args(t_params *params, char **argv)
 
 int	main(int argc, char **argv)
 {
-	t_params	params;
-	t_coder		*coders;
-	t_dongle	*dongles;
+	t_sim	sim;
 
 	if (argc != 9)
 	{
@@ -104,11 +102,13 @@ int	main(int argc, char **argv)
 	}
 	if (validate_args(argv) != 0)
 		return (1);
-	if (parse_args(&params, argv) != 0)
+	if (parse_args(&sim.params, argv) != 0)
 		return (1);
-	dongles = malloc(sizeof(t_dongle) * params.number_of_coders);
-	create_dongles(dongles, params.number_of_coders);
-	coders = malloc(sizeof(t_coder) * params.number_of_coders);
-	create_coders(coders, dongles, &params);
+	sim.dongles = malloc(sizeof(t_dongle) * sim.params.number_of_coders);
+	create_dongles(sim.dongles, sim.params.number_of_coders);
+	sim.running = 1;
+	pthread_mutex_init(&sim.log_mutex, NULL);
+	sim.coders = malloc(sizeof(t_coder) * sim.params.number_of_coders);
+	create_coders(sim.coders, sim.dongles, &sim);
 	return (0);
 }

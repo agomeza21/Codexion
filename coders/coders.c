@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/29 13:46:00 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/05/29 14:30:32 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,36 +43,36 @@ static void	*func(void *arg)
 			printf("%ld %d has taken a dongle\n", calculate_time() - coder->start_time, coder->id);
 		}
 		printf("%ld %d is compiling\n", calculate_time() - coder->start_time, coder->id);
-		usleep(coder->params->time_to_compile * 1000);
+		usleep(coder->sim->params.time_to_compile * 1000);
 		release_dongle(coder->left);
 		release_dongle(coder->right);
 		printf("%ld %d is debugging\n", calculate_time() - coder->start_time, coder->id);
-		usleep(coder->params->time_to_debug * 1000);
+		usleep(coder->sim->params.time_to_debug * 1000);
 		printf("%ld %d is refactoring\n", calculate_time() - coder->start_time, coder->id);
-		usleep(coder->params->time_to_refactor * 1000);
+		usleep(coder->sim->params.time_to_refactor * 1000);
 	}
 	return (NULL);
 }
 
-void	create_coders(t_coder *coders, t_dongle *dongles, t_params *params)
+void	create_coders(t_coder *coders, t_dongle *dongles, t_sim *sim)
 {
 	int		i;
 	long	start_time;
 
 	start_time = calculate_time();
 	i = 0;
-	while (i < params->number_of_coders)
+	while (i < sim->params.number_of_coders)
 	{
 		coders[i].id = i + 1;
 		coders[i].start_time = start_time;
-		coders[i].params = params;
+		coders[i].sim = sim;
 		coders[i].left = &dongles[i];
-		coders[i].right = &dongles[(i + 1) % params->number_of_coders];
+		coders[i].right = &dongles[(i + 1) % sim->params.number_of_coders];
 		pthread_create(&coders[i].thread, NULL, func, &coders[i]);
 		i++;
 	}
 	i = 0;
-	while (i < params->number_of_coders)
+	while (i < sim->params.number_of_coders)
 	{
 		pthread_join(coders[i].thread, NULL);
 		i++;

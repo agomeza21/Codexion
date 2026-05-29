@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   dongles.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
+/*   Updated: 2026/05/29 14:31:05 by agomez-a         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "structs.h"
 
 void    release_dongle(t_dongle *dongle)
@@ -12,7 +24,7 @@ void    release_dongle(t_dongle *dongle)
 void    take_dongle(t_dongle *dongle, t_coder *coder)
 {
 	pthread_mutex_lock(&dongle->mutex);
-	while (dongle->in_use == 1 || calculate_time() - dongle->release_time < coder->params->dongle_cooldown)
+	while (dongle->in_use == 1 || calculate_time() - dongle->release_time < coder->sim->params.dongle_cooldown)
 		pthread_cond_wait(&dongle->cond, &dongle->mutex);
 	dongle->in_use = 1;
 	pthread_mutex_unlock(&dongle->mutex);
