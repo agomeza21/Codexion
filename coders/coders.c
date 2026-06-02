@@ -6,11 +6,18 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/05/29 14:30:32 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/02 15:42:04 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+void	log_action(t_sim *sim, int id, char *action)
+{
+	pthread_mutex_lock(&sim->log_mutex);
+	printf("%ld %d %s\n", calculate_time() - sim->coders->start_time, sim->coders->id, action);
+	pthread_mutex_unlock(&sim->log_mutex);
+}
 
 long	calculate_time(void)
 {
@@ -31,24 +38,24 @@ static void	*func(void *arg)
 		if (coder->id % 2 == 0)
 		{
 			take_dongle(coder->right, coder);
-			printf("%ld %d has taken a dongle\n", calculate_time() - coder->start_time, coder->id);
+			log_action(coder->sim, coder->id, "has taken a dongle");
 			take_dongle(coder->left, coder);
-			printf("%ld %d has taken a dongle\n", calculate_time() - coder->start_time, coder->id);
+			log_action(coder->sim, coder->id, "has taken a dongle");
 		}
 		else
 		{
 			take_dongle(coder->left, coder);
-			printf("%ld %d has taken a dongle\n", calculate_time() - coder->start_time, coder->id);
+			log_action(coder->sim, coder->id, "has taken a dongle");
 			take_dongle(coder->right, coder);
-			printf("%ld %d has taken a dongle\n", calculate_time() - coder->start_time, coder->id);
+			log_action(coder->sim, coder->id, "has taken a dongle");
 		}
-		printf("%ld %d is compiling\n", calculate_time() - coder->start_time, coder->id);
+		log_action(coder->sim, coder->id, "is compiling");
 		usleep(coder->sim->params.time_to_compile * 1000);
 		release_dongle(coder->left);
 		release_dongle(coder->right);
-		printf("%ld %d is debugging\n", calculate_time() - coder->start_time, coder->id);
+		log_action(coder->sim, coder->id, "is debugging");
 		usleep(coder->sim->params.time_to_debug * 1000);
-		printf("%ld %d is refactoring\n", calculate_time() - coder->start_time, coder->id);
+		log_action(coder->sim, coder->id, "is refactoring");
 		usleep(coder->sim->params.time_to_refactor * 1000);
 	}
 	return (NULL);
