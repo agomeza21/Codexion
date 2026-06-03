@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:55:01 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 17:42:50 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ static int	grab_dongles(t_coder *coder)
 		if (!take_dongle(coder->right, coder))
 			return (0);
 		if (!take_dongle(coder->left, coder))
-			return (0);
+			return (2);
 		log_action(coder->sim, coder->id, "has taken a dongle");
 		log_action(coder->sim, coder->id, "has taken a dongle");
 	}
@@ -28,7 +28,7 @@ static int	grab_dongles(t_coder *coder)
 		if (!take_dongle(coder->left, coder))
 			return (0);
 		if (!take_dongle(coder->right, coder))
-			return (0);
+			return (3);
 		log_action(coder->sim, coder->id, "has taken a dongle");
 		log_action(coder->sim, coder->id, "has taken a dongle");
 	}
@@ -41,14 +41,10 @@ static int	compile_cycle(t_coder *coder)
 	log_action(coder->sim, coder->id, "is compiling");
 	coder->compile_count++;
 	usleep(coder->sim->params.time_to_compile * 1000);
-	if (coder->sim->running == 0)
-	{
-		release_dongle(coder->left);
-		release_dongle(coder->right);
-		return (0);
-	}
 	release_dongle(coder->left);
 	release_dongle(coder->right);
+	if (coder->sim->running == 0)
+		return (0);
 	log_action(coder->sim, coder->id, "is debugging");
 	usleep(coder->sim->params.time_to_debug * 1000);
 	if (coder->sim->running == 0)
@@ -63,14 +59,20 @@ static int	compile_cycle(t_coder *coder)
 static void	*func(void *arg)
 {
 	t_coder		*coder;
+	int			result;
 
 	coder = (t_coder *)arg;
 	while (coder->sim->running == 1)
 	{
-		if (!grab_dongles(coder))
+		result = grab_dongles(coder);
+		if (result == 2)
+		{
+			release_dongle(coder->right);
+			return (NULL);
+		}
+		if (result == 3)
 		{
 			release_dongle(coder->left);
-			release_dongle(coder->right);
 			return (NULL);
 		}
 		if (!compile_cycle(coder))
