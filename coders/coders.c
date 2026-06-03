@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:32:11 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:55:01 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,18 @@ static int	grab_dongles(t_coder *coder)
 	{
 		if (!take_dongle(coder->right, coder))
 			return (0);
-		log_action(coder->sim, coder->id, "has taken a dongle");
 		if (!take_dongle(coder->left, coder))
 			return (0);
+		log_action(coder->sim, coder->id, "has taken a dongle");
 		log_action(coder->sim, coder->id, "has taken a dongle");
 	}
 	else
 	{
 		if (!take_dongle(coder->left, coder))
 			return (0);
-		log_action(coder->sim, coder->id, "has taken a dongle");
 		if (!take_dongle(coder->right, coder))
 			return (0);
+		log_action(coder->sim, coder->id, "has taken a dongle");
 		log_action(coder->sim, coder->id, "has taken a dongle");
 	}
 	return (1);
