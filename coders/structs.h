@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/02 18:42:30 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 13:56:50 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,6 +65,7 @@ typedef struct s_coder
 typedef struct s_sim
 {
 	pthread_mutex_t	log_mutex;
+	pthread_t		monitor;
 	t_params		params;
 	t_coder			*coders;
 	t_dongle		*dongles;
@@ -72,11 +73,14 @@ typedef struct s_sim
 	long			start_time;
 }	t_sim;
 
-void	create_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
-void    take_dongle(t_dongle *dongle, t_coder *coder);
+void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
+int		take_dongle(t_dongle *dongle, t_coder *coder);
 void	log_action(t_sim *sim, int id, char *action);
+void	start_coders(t_coder *coders, t_sim *sim);
 void    create_dongles(t_dongle *dongles, int n);
 void    release_dongle(t_dongle *dongle);
+void	wake_all_dongles(t_sim *sim);
+void	*monitor_func(void *arg);
 long	calculate_time(void);
 
 #endif

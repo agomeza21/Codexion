@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/02 18:41:34 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 13:33:57 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,9 @@ int	main(int argc, char **argv)
 	pthread_mutex_init(&sim.log_mutex, NULL);
 	sim.coders = malloc(sizeof(t_coder) * sim.params.number_of_coders);
 	sim.start_time = calculate_time();
-	create_coders(sim.coders, sim.dongles, &sim);
+	init_coders(sim.coders, sim.dongles, &sim);
+	pthread_create(&sim.monitor, NULL, monitor_func, &sim);
+	start_coders(sim.coders, &sim);
+	pthread_join(sim.monitor, NULL);
 	return (0);
 }
