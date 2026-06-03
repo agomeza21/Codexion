@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 13:33:57 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:32:37 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,6 @@ int	parse_args(t_params *params, char **argv)
 	params->time_to_refactor = atoi(argv[5]);
 	params->number_of_compiles_required = atoi(argv[6]);
 	params->dongle_cooldown = atoi(argv[7]);
-	//1 si es edf, 0 si es fifo
 	params->scheduler = (strcmp(argv[8], "edf") == 0);
 	if (check_values(params) != 0)
 		return (1);

@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 13:56:50 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:33:49 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,8 +20,8 @@
 # include <sys/time.h>
 # include <unistd.h>
 
-typedef struct s_sim t_sim;
-typedef struct s_request t_request;
+typedef struct s_sim		t_sim;
+typedef struct s_request	t_request;
 
 typedef struct s_params
 {
@@ -38,7 +38,7 @@ typedef struct s_params
 typedef struct s_request
 {
 	t_request		*next;
-	long 			timestamp;
+	long			timestamp;
 	pthread_cond_t	self_cond;
 
 }	t_request;
@@ -77,9 +77,8 @@ void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
 int		take_dongle(t_dongle *dongle, t_coder *coder);
 void	log_action(t_sim *sim, int id, char *action);
 void	start_coders(t_coder *coders, t_sim *sim);
-void    create_dongles(t_dongle *dongles, int n);
-void    release_dongle(t_dongle *dongle);
-void	wake_all_dongles(t_sim *sim);
+void	create_dongles(t_dongle *dongles, int n);
+void	release_dongle(t_dongle *dongle);
 void	*monitor_func(void *arg);
 long	calculate_time(void);
 

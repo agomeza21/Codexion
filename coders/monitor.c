@@ -6,11 +6,31 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 13:20:27 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/03 16:41:00 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+static void	wake_all_dongles(t_sim *sim)
+{
+	t_request	*current;
+	int			i;
+
+	i = 0;
+	while (i < sim->params.number_of_coders)
+	{
+		pthread_mutex_lock(&sim->dongles[i].mutex);
+		current = sim->dongles[i].queue;
+		while (current != NULL)
+		{
+			pthread_cond_signal(&current->self_cond);
+			current = current->next;
+		}
+		pthread_mutex_unlock(&sim->dongles[i].mutex);
+		i++;
+	}
+}
 
 static int	check_all_done(t_sim *sim)
 {
@@ -21,10 +41,11 @@ static int	check_all_done(t_sim *sim)
 	j = 0;
 	while (j < sim->params.number_of_coders)
 	{
-		if (sim->coders[j].compile_count < sim->params.number_of_compiles_required)
+		if (sim->coders[j].compile_count
+			< sim->params.number_of_compiles_required)
 		{
 			all_done = 0;
-			break;
+			break ;
 		}
 		j++;
 	}
@@ -43,7 +64,8 @@ static int	check_burnout(t_sim *sim)
 	i = 0;
 	while (i < sim->params.number_of_coders)
 	{
-		if (calculate_time() - sim->coders[i].last_compile_start >= sim->params.time_to_burnout)
+		if (calculate_time() - sim->coders[i].last_compile_start
+			>= sim->params.time_to_burnout)
 		{
 			log_action(sim, sim->coders[i].id, "burned out");
 			sim->running = 0;
