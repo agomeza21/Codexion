@@ -6,11 +6,32 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 15:54:21 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 15:56:06 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 12:46:37 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+void	enqueue_edf(t_dongle *dongle, t_request *my_turn)
+{
+	t_request		*current;
+
+	if (dongle->queue == NULL)
+		dongle->queue = my_turn;
+	else if (my_turn->deadline < dongle->queue->deadline)
+	{
+		my_turn->next = dongle->queue;
+		dongle->queue = my_turn;
+	}
+	else
+	{
+		current = dongle->queue;
+		while (current->next && my_turn->deadline >= current->next->deadline)
+			current = current->next;
+		my_turn->next = current->next;
+		current->next = my_turn;
+	}
+}
 
 long	calculate_time(void)
 {

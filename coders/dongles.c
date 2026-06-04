@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:40:23 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 12:47:20 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,18 +22,25 @@ void	release_dongle(t_dongle *dongle)
 	pthread_mutex_unlock(&dongle->mutex);
 }
 
-static void	enqueue(t_dongle *dongle, t_request *my_turn)
+static void	enqueue(t_dongle *dongle, t_request *my_turn, int scheduler)
 {
 	t_request		*current;
 
-	if (dongle->queue == NULL)
-		dongle->queue = my_turn;
+	if (scheduler == 0)
+	{
+		if (dongle->queue == NULL)
+			dongle->queue = my_turn;
+		else
+		{
+			current = dongle->queue;
+			while (current->next)
+				current = current->next;
+			current->next = my_turn;
+		}
+	}
 	else
 	{
-		current = dongle->queue;
-		while (current->next)
-			current = current->next;
-		current->next = my_turn;
+		enqueue_edf(dongle, my_turn);
 	}
 }
 
@@ -64,7 +71,8 @@ int	take_dongle(t_dongle *dongle, t_coder *coder)
 	my_turn.next = NULL;
 	pthread_cond_init(&my_turn.self_cond, NULL);
 	pthread_mutex_lock(&dongle->mutex);
-	enqueue(dongle, &my_turn);
+	my_turn.deadline = coder->last_compile_start + coder->sim->params.time_to_burnout;
+	enqueue(dongle, &my_turn, coder->sim->params.scheduler);
 	wait_for_dongle(dongle, coder, &my_turn);
 	if (coder->sim->running == 0)
 	{

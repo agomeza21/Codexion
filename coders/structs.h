@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:33:49 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 12:46:57 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,9 +37,10 @@ typedef struct s_params
 
 typedef struct s_request
 {
+	pthread_cond_t	self_cond;
 	t_request		*next;
 	long			timestamp;
-	pthread_cond_t	self_cond;
+	long			deadline;
 
 }	t_request;
 
@@ -74,6 +75,7 @@ typedef struct s_sim
 }	t_sim;
 
 void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
+void	enqueue_edf(t_dongle *dongle, t_request *my_turn);
 int		take_dongle(t_dongle *dongle, t_coder *coder);
 void	log_action(t_sim *sim, int id, char *action);
 void	start_coders(t_coder *coders, t_sim *sim);
