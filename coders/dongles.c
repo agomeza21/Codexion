@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 13:09:55 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 18:42:40 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,11 +79,13 @@ int	take_dongle(t_dongle *dongle, t_coder *coder)
 	{
 		dequeue(dongle, &my_turn);
 		pthread_mutex_unlock(&dongle->mutex);
+		pthread_cond_destroy(&my_turn.self_cond);
 		return (0);
 	}
 	dequeue(dongle, &my_turn);
 	dongle->in_use = 1;
 	pthread_mutex_unlock(&dongle->mutex);
+	pthread_cond_destroy(&my_turn.self_cond);
 	return (1);
 }
 

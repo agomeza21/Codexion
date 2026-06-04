@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 13:14:32 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 18:40:56 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,9 @@ int	parse_args(t_params *params, char **argv)
 int	main(int argc, char **argv)
 {
 	t_sim	sim;
+	int		i;
 
+	i = 0;
 	if (argc != 9)
 	{
 		printf("ERROR: invalid number of arguments");
@@ -115,5 +117,13 @@ int	main(int argc, char **argv)
 	pthread_create(&sim.monitor, NULL, monitor_func, &sim);
 	start_coders(sim.coders, &sim);
 	pthread_join(sim.monitor, NULL);
+	pthread_mutex_destroy(&sim.log_mutex);
+	while (i < sim.params.number_of_coders)
+	{
+		pthread_mutex_destroy(&sim.dongles[i].mutex);
+		i++;
+	}
+	free(sim.dongles);
+	free(sim.coders);
 	return (0);
 }
