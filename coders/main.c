@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:32:37 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 13:14:32 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,6 +17,8 @@ int	validate_number(char *str, int index)
 	int	j;
 
 	j = 0;
+	if (str[0] == '\0')
+		return (1);
 	while (str[j])
 	{
 		if (j == 0 && str[j] == '-')

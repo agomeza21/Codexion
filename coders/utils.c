@@ -6,11 +6,27 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 15:54:21 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 12:46:37 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/04 13:11:56 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+void	dequeue(t_dongle *dongle, t_request *my_turn)
+{
+	t_request	*current;
+
+	if (dongle->queue == my_turn)
+		dongle->queue = my_turn->next;
+	else
+	{
+		current = dongle->queue;
+		while (current->next && current->next != my_turn)
+			current = current->next;
+		if (current->next == my_turn)
+			current->next = my_turn->next;
+	}
+}
 
 void	enqueue_edf(t_dongle *dongle, t_request *my_turn)
 {
