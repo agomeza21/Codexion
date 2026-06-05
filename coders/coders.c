@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 18:30:29 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/05 12:32:56 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,6 +37,12 @@ static int	grab_dongles(t_coder *coder)
 
 static int	compile_cycle(t_coder *coder)
 {
+	if (coder->sim->running == 0)
+	{
+		release_dongle(coder->left);
+    	release_dongle(coder->right);
+    	return (0);
+	}
 	coder->last_compile_start = calculate_time();
 	log_action(coder->sim, coder->id, "is compiling");
 	coder->compile_count++;
