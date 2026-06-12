@@ -6,12 +6,18 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 10:18:51 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 10:43:33 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
 
+/*
+Checks that a string represents a valid unsigned integer.
+Used to validate the first 7 arguments before converting them
+with atoi, since atoi doesn't distinguish between "0" and an
+invalid string like "abc" (both return 0).
+*/
 int	validate_number(char *str, int index)
 {
 	int	j;
@@ -36,6 +42,12 @@ int	validate_number(char *str, int index)
 	return (0);
 }
 
+/*
+Loops through argv[1] to argv[7] validating that they are valid
+integers, and checks that argv[8] is exactly "fifo" or "edf".
+This is the first validation pass before converting anything
+with atoi.
+*/
 int	validate_args(char **argv)
 {
 	int	i;
@@ -55,6 +67,11 @@ int	validate_args(char **argv)
 	return (0);
 }
 
+/*
+Once the arguments have been converted with atoi, checks that the
+values make sense: all > 0 except dongle_cooldown, which can be 0
+(no cooldown is valid).
+*/
 int	check_values(t_params *params)
 {
 	if (params->number_of_coders <= 0 || params->time_to_burnout <= 0
@@ -77,6 +94,12 @@ int	check_values(t_params *params)
 	return (0);
 }
 
+/*
+Converts all text arguments to integers with atoi and stores them
+in params. The scheduler is stored as 0 (fifo) or 1 (edf) so it
+can easily be used as a condition/index throughout the rest of
+the code. Calls check_values for the final validation.
+*/
 int	parse_args(t_params *params, char **argv)
 {
 	params->number_of_coders = atoi(argv[1]);
@@ -92,6 +115,13 @@ int	parse_args(t_params *params, char **argv)
 	return (0);
 }
 
+/*
+Entry point of the program.
+Flow: validate argc, validate and parse arguments, initialize the
+simulation, launch the monitor thread and the coder threads, wait
+for all of them to finish, and free all memory/resources before
+exiting.
+*/
 int	main(int argc, char **argv)
 {
 	t_sim	sim;

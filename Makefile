@@ -1,7 +1,7 @@
 NAME = codexion
 
 SRCDIR = coders
-SRCS = $(addprefix $(SRCDIR)/, main.c coders.c dongles.c monitor.c utils.c)
+SRCS = $(addprefix $(SRCDIR)/, main.c coders.c dongles.c monitor.c utils.c queue.c)
 OBJS = $(SRCS:.c=.o)
 
 CC = cc

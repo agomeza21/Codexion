@@ -6,12 +6,30 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 10:12:22 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 10:49:30 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
 
+/*
+Tries to take the two dongles needed to compile.
+The order of acquisition depends on the parity of the id: even ids
+take the right dongle first, then the left; odd ids do the opposite.
+This breaks the circular wait chain and avoids the classic deadlock
+from the dining philosophers problem (not everyone waits in the
+same direction).
+
+Returns:
+	1 -> both dongles acquired
+	0 -> running became 0 while waiting for the FIRST dongle
+		(nothing was taken)
+	2 -> got the right dongle but running became 0 while waiting
+		for the left one
+	3 -> got the left dongle but running became 0 while waiting
+		for the right one
+	Values 2/3 let func() know which dongle needs to be released.
+*/
 static int	grab_dongles(t_coder *coder)
 {
 	if (coder->id % 2 == 0)
@@ -35,6 +53,15 @@ static int	grab_dongles(t_coder *coder)
 	return (1);
 }
 
+/*
+Runs one full cycle: compile -> debug -> refactor.
+Checks sim->running BEFORE each phase (including the first one,
+before compiling) so that if the simulation has ended, the coder
+doesn't register a compile or print logs that shouldn't exist.
+If running becomes 0 during compilation, the dongles are released
+before returning; during debug/refactor there are no dongles left
+to release.
+*/
 static int	compile_cycle(t_coder *coder)
 {
 	if (coder->sim->running == 0)
@@ -62,6 +89,13 @@ static int	compile_cycle(t_coder *coder)
 	return (1);
 }
 
+/*
+Function executed by each coder thread.
+Main loop: while the simulation is active, tries to take both
+dongles and run a compile cycle.
+If grab_dongles returns 2 or 3, releases whichever dongle it did
+manage to get before ending the thread, so it isn't left held.
+*/
 static void	*func(void *arg)
 {
 	t_coder		*coder;
@@ -87,6 +121,15 @@ static void	*func(void *arg)
 	return (NULL);
 }
 
+/*
+Initializes each coder's data before launching the threads:
+- id from 1 to N (as required by the subject)
+- pointers to its left and right dongles (circular layout)
+- compile_count set to 0
+- last_compile_start = simulation's start_time, so the monitor
+  doesn't detect a false burnout before anyone has started
+  compiling
+*/
 void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim)
 {
 	int		i;
@@ -104,6 +147,11 @@ void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim)
 	}
 }
 
+/*
+Creates one thread per coder (pthread_create) and then waits for
+all of them to finish (pthread_join). Split into two loops because
+join can't be called until ALL threads have been created.
+*/
 void	start_coders(t_coder *coders, t_sim *sim)
 {
 	int	i;

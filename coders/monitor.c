@@ -6,12 +6,19 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/03 16:41:00 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 11:47:45 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
 
+/*
+Goes through every dongle and sends pthread_cond_signal to each
+request in its queue. Called when running becomes 0, so that no
+coder is left sleeping forever in pthread_cond_wait/timedwait
+waiting for a dongle that will never come -- this way every
+thread can wake up, check running==0, and finish cleanly.
+*/
 static void	wake_all_dongles(t_sim *sim)
 {
 	t_request	*current;
@@ -32,6 +39,12 @@ static void	wake_all_dongles(t_sim *sim)
 	}
 }
 
+/*
+Checks whether ALL coders have reached number_of_compiles_required.
+If so, sets running=0 and returns 1 (successful end of simulation).
+The subject requires "all of them", not "any of them" -- hence the
+full loop before deciding.
+*/
 static int	check_all_done(t_sim *sim)
 {
 	int		j;
@@ -57,6 +70,13 @@ static int	check_all_done(t_sim *sim)
 	return (0);
 }
 
+/*
+Checks whether any coder has gone >= time_to_burnout without
+compiling since its last_compile_start. If so, logs it as
+"burned out", sets running=0, and returns 1.
+This stops the simulation immediately (no need to keep checking
+the others).
+*/
 static int	check_burnout(t_sim *sim)
 {
 	int		i;
@@ -76,6 +96,15 @@ static int	check_burnout(t_sim *sim)
 	return (0);
 }
 
+/*
+Monitor thread: runs in parallel with the coders and checks every
+1ms whether there's a burnout or whether the simulation has
+finished successfully.
+The 1ms interval guarantees the requirement that a burnout be
+logged within 10ms of when it actually occurs.
+When either condition is detected, wakes up every blocked coder
+(wake_all_dongles) so they can finish.
+*/
 void	*monitor_func(void *arg)
 {
 	t_sim	*sim;
