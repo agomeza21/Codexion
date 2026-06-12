@@ -6,47 +6,36 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 15:54:21 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 13:11:56 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 10:29:19 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
 
-void	dequeue(t_dongle *dongle, t_request *my_turn)
+void	cleanup_sim(t_sim *sim)
 {
-	t_request	*current;
+	int		i;
 
-	if (dongle->queue == my_turn)
-		dongle->queue = my_turn->next;
-	else
+	i = 0;
+	pthread_mutex_destroy(&sim->log_mutex);
+	while (i < sim->params.number_of_coders)
 	{
-		current = dongle->queue;
-		while (current->next && current->next != my_turn)
-			current = current->next;
-		if (current->next == my_turn)
-			current->next = my_turn->next;
+		pthread_mutex_destroy(&sim->dongles[i].mutex);
+		i++;
 	}
+	free(sim->dongles);
+	free(sim->coders);
 }
 
-void	enqueue_edf(t_dongle *dongle, t_request *my_turn)
+void	setup_sim(t_sim *sim)
 {
-	t_request		*current;
-
-	if (dongle->queue == NULL)
-		dongle->queue = my_turn;
-	else if (my_turn->deadline < dongle->queue->deadline)
-	{
-		my_turn->next = dongle->queue;
-		dongle->queue = my_turn;
-	}
-	else
-	{
-		current = dongle->queue;
-		while (current->next && my_turn->deadline >= current->next->deadline)
-			current = current->next;
-		my_turn->next = current->next;
-		current->next = my_turn;
-	}
+	sim->dongles = malloc(sizeof(t_dongle) * sim->params.number_of_coders);
+	create_dongles(sim->dongles, sim->params.number_of_coders);
+	sim->running = 1;
+	pthread_mutex_init(&sim->log_mutex, NULL);
+	sim->coders = malloc(sizeof(t_coder) * sim->params.number_of_coders);
+	sim->start_time = calculate_time();
+	init_coders(sim->coders, sim->dongles, sim);
 }
 
 long	calculate_time(void)

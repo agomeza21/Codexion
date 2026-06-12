@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 13:12:23 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 10:30:42 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,6 +74,7 @@ typedef struct s_sim
 	long			start_time;
 }	t_sim;
 
+void	enqueue(t_dongle *dongle, t_request *my_turn, int scheduler);
 void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
 void	enqueue_edf(t_dongle *dongle, t_request *my_turn);
 int		take_dongle(t_dongle *dongle, t_coder *coder);
@@ -83,6 +84,8 @@ void	start_coders(t_coder *coders, t_sim *sim);
 void	create_dongles(t_dongle *dongles, int n);
 void	release_dongle(t_dongle *dongle);
 void	*monitor_func(void *arg);
+void	cleanup_sim(t_sim *sim);
+void	setup_sim(t_sim *sim);
 long	calculate_time(void);
 
 #endif

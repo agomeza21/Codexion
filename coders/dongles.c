@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/04 18:42:40 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/12 10:28:30 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,28 +20,6 @@ void	release_dongle(t_dongle *dongle)
 	if (dongle->queue != NULL)
 		pthread_cond_signal(&dongle->queue->self_cond);
 	pthread_mutex_unlock(&dongle->mutex);
-}
-
-static void	enqueue(t_dongle *dongle, t_request *my_turn, int scheduler)
-{
-	t_request		*current;
-
-	if (scheduler == 0)
-	{
-		if (dongle->queue == NULL)
-			dongle->queue = my_turn;
-		else
-		{
-			current = dongle->queue;
-			while (current->next)
-				current = current->next;
-			current->next = my_turn;
-		}
-	}
-	else
-	{
-		enqueue_edf(dongle, my_turn);
-	}
 }
 
 static void	wait_for_dongle(t_dongle *dongle, t_coder *coder,
