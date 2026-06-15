@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 10:30:42 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/15 16:33:13 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,10 @@
 typedef struct s_sim		t_sim;
 typedef struct s_request	t_request;
 
+/*
+Simulation parameters, parsed from the command-line arguments.
+scheduler is stored as 0 (fifo) or 1 (edf).
+*/
 typedef struct s_params
 {
 	int		number_of_coders;
@@ -35,6 +39,15 @@ typedef struct s_params
 	int		scheduler;
 }	t_params;
 
+/*
+Represents one coder's request to take a specific dongle.
+Each take_dongle() call creates its own t_request on the calling
+thread's stack, with its own condition variable (self_cond), so
+that thread can be woken up individually when it's its turn.
+next links it into the dongle's waiting queue.
+deadline = last_compile_start + time_to_burnout, only used to
+order the queue when scheduler == edf.
+*/
 typedef struct s_request
 {
 	pthread_cond_t	self_cond;
@@ -44,6 +57,16 @@ typedef struct s_request
 
 }	t_request;
 
+/*
+Represents one dongle on the table.
+in_use: 1 while some coder is currently holding it.
+release_time: timestamp of the last release, used to enforce
+dongle_cooldown.
+mutex: protects in_use, release_time and queue from concurrent
+access by multiple coder threads.
+queue: linked list of t_request waiting for this dongle, ordered
+either by arrival (fifo) or by deadline (edf).
+*/
 typedef struct s_dongle
 {
 	int				in_use;
@@ -52,6 +75,15 @@ typedef struct s_dongle
 	t_request		*queue;
 }	t_dongle;
 
+/*
+Represents one programmer/thread.
+id: 1 to number_of_coders, as required by the subject.
+compile_count: how many times this coder has finished compiling;
+checked by the monitor against number_of_compiles_required.
+last_compile_start: timestamp of the start of the current/last
+compilation; checked by the monitor against time_to_burnout.
+left/right: pointers to this coder's two neighboring dongles.
+*/
 typedef struct s_coder
 {
 	int			id;
@@ -63,6 +95,17 @@ typedef struct s_coder
 	t_dongle	*right;
 }	t_coder;
 
+/*
+Global simulation state, shared by every thread.
+log_mutex: serializes printf calls so log lines never interleave.
+monitor: handle for the monitor thread.
+running: 1 while the simulation is active; set to 0 by the monitor
+once it decides to stop it (either a burnout was detected, or every
+coder reached number_of_compiles_required). All threads check this
+flag to know when to stop.
+start_time: timestamp taken at the beginning of the simulation,
+used as the 0 reference for every log timestamp.
+*/
 typedef struct s_sim
 {
 	pthread_mutex_t	log_mutex;
