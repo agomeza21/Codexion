@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 11:47:45 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/15 21:31:33 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 /*
 Goes through every dongle and sends pthread_cond_signal to each
 request in its queue. Called when running becomes 0, so that no
-coder is left sleeping forever in pthread_cond_wait/timedwait
+coder is left sleeping forever in pthread_cond_timedwait
 waiting for a dongle that will never come -- this way every
 thread can wake up, check running==0, and finish cleanly.
 */
