@@ -6,11 +6,42 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 10:28:07 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 12:47:42 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/15 23:26:08 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+/*
+Inserts request into the dongle's min-heap, keeping the heap
+property: every parent has a priority <= its children's.
+The new element is placed at the end and "bubbled up"
+(sift-up): while it's smaller than its parent, they swap.
+This guarantees heap[0] is always the smallest priority.
+*/
+void	heap_push(t_dongle *dongle, t_request *req)
+{
+	int			i;
+	int			parent;
+	t_request	*tmp;
+
+	dongle->heap[dongle->heap_size] = req;
+	i = dongle->heap_size;
+	dongle->heap_size++;
+	while (i > 0)
+	{
+		parent = (i - 1) / 2;
+		if (dongle->heap[i]->priority >= dongle->heap[parent]->priority)
+			break ;
+		tmp = dongle->heap[i];
+		dongle->heap[i] = dongle->heap[parent];
+		dongle->heap[parent] = tmp;
+		i = parent;
+	}
+}
+
+
+
 
 /*
 Adds my_turn to the dongle's waiting queue according to the

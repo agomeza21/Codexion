@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/15 16:33:13 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/15 23:13:05 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,17 +44,16 @@ Represents one coder's request to take a specific dongle.
 Each take_dongle() call creates its own t_request on the calling
 thread's stack, with its own condition variable (self_cond), so
 that thread can be woken up individually when it's its turn.
-next links it into the dongle's waiting queue.
-deadline = last_compile_start + time_to_burnout, only used to
-order the queue when scheduler == edf.
+priority is the value the heap compares: for fifo it's the
+arrival timestamp (earlier = smaller = served first), for edf
+it's the deadline (last_compile_start + time_to_burnout, sooner
+= smaller = served first). The heap doesn't know which scheduler
+is active, it just always extracts the smallest priority.
 */
 typedef struct s_request
 {
 	pthread_cond_t	self_cond;
-	t_request		*next;
-	long			timestamp;
-	long			deadline;
-
+	long			priority;
 }	t_request;
 
 /*
@@ -62,17 +61,21 @@ Represents one dongle on the table.
 in_use: 1 while some coder is currently holding it.
 release_time: timestamp of the last release, used to enforce
 dongle_cooldown.
-mutex: protects in_use, release_time and queue from concurrent
-access by multiple coder threads.
-queue: linked list of t_request waiting for this dongle, ordered
-either by arrival (fifo) or by deadline (edf).
+mutex: protects in_use, release_time and the heap from
+concurrent access by multiple coder threads.
+heap: min-heap of pointers to waiting t_request, ordered by
+priority (smallest first). heap[0] is always the next request
+to be served. Allocated with size number_of_coders, since at
+most one request per coder can be waiting on a single dongle.
+heap_size: current number of elements stored in heap.
 */
 typedef struct s_dongle
 {
 	int				in_use;
 	long			release_time;
 	pthread_mutex_t	mutex;
-	t_request		*queue;
+	t_request		**heap;
+	int				heap_size;
 }	t_dongle;
 
 /*
