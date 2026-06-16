@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/15 21:31:33 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/16 11:45:50 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,25 +14,25 @@
 
 /*
 Goes through every dongle and sends pthread_cond_signal to each
-request in its queue. Called when running becomes 0, so that no
+request in its heap. Called when running becomes 0, so that no
 coder is left sleeping forever in pthread_cond_timedwait
 waiting for a dongle that will never come -- this way every
 thread can wake up, check running==0, and finish cleanly.
 */
 static void	wake_all_dongles(t_sim *sim)
 {
-	t_request	*current;
-	int			i;
+	int	i;
+	int	j;
 
 	i = 0;
 	while (i < sim->params.number_of_coders)
 	{
 		pthread_mutex_lock(&sim->dongles[i].mutex);
-		current = sim->dongles[i].queue;
-		while (current != NULL)
+		j = 0;
+		while (j < sim->dongles[i].heap_size)
 		{
-			pthread_cond_signal(&current->self_cond);
-			current = current->next;
+			pthread_cond_signal(&sim->dongles[i].heap[j]->self_cond);
+			j++;
 		}
 		pthread_mutex_unlock(&sim->dongles[i].mutex);
 		i++;

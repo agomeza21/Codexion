@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/15 23:13:05 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/16 11:41:39 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -120,18 +120,19 @@ typedef struct s_sim
 	long			start_time;
 }	t_sim;
 
-void	enqueue(t_dongle *dongle, t_request *my_turn, int scheduler);
-void	init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
-void	enqueue_edf(t_dongle *dongle, t_request *my_turn);
-int		take_dongle(t_dongle *dongle, t_coder *coder);
-void	dequeue(t_dongle *dongle, t_request *my_turn);
-void	log_action(t_sim *sim, int id, char *action);
-void	start_coders(t_coder *coders, t_sim *sim);
-void	create_dongles(t_dongle *dongles, int n);
-void	release_dongle(t_dongle *dongle);
-void	*monitor_func(void *arg);
-void	cleanup_sim(t_sim *sim);
-void	setup_sim(t_sim *sim);
-long	calculate_time(void);
+void		init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
+int			take_dongle(t_dongle *dongle, t_coder *coder);
+void		log_action(t_sim *sim, int id, char *action);
+void		heap_remove(t_dongle *dongle, t_request *req);
+void		heap_push(t_dongle *dongle, t_request *req);
+void		start_coders(t_coder *coders, t_sim *sim);
+void		create_dongles(t_dongle *dongles, int n);
+void		release_dongle(t_dongle *dongle);
+t_request	*heap_peek(t_dongle *dongle);
+t_request	*heap_pop(t_dongle *dongle);
+void		*monitor_func(void *arg);
+void		cleanup_sim(t_sim *sim);
+void		setup_sim(t_sim *sim);
+long		calculate_time(void);
 
 #endif
