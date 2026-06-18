@@ -137,14 +137,14 @@ and its waiting queue). Any thread reading or modifying a dongle's state must
 hold this mutex first, preventing race conditions such as two coders both
 believing they successfully took the same dongle.
 
-**Per-request `pthread_cond_t` (custom waiting queue)**
+**Per-request `pthread_cond_t` (custom waiting heap)**
 Instead of a single condition variable per dongle, each waiting request
 (`t_request`) carries its **own** `pthread_cond_t`, created on the waiting
 thread's stack inside `take_dongle`. This allows the dongle to wake up a
 **specific** coder (via `pthread_cond_signal` on that request's condition)
 rather than waking everyone and letting them race — which is what makes a
 true FIFO/EDF ordering possible: the dongle is only handed to the request at
-the front of the queue.
+the front of the heap.
 
 **Queue-based scheduling (`enqueue` / `enqueue_edf` / `dequeue`)**
 When a coder calls `take_dongle`, it builds a `t_request` with its arrival

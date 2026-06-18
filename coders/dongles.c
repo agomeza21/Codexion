@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/16 11:43:49 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/18 15:54:25 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,17 +59,27 @@ static void	wait_for_dongle(t_dongle *dongle, t_coder *coder,
 {
 	struct timespec	ts;
 	long			wake_time;
+	int				is_running;
 
-	while (coder->sim->running == 1
-		&& (heap_peek(dongle) != my_turn
-			|| dongle->in_use == 1
-			|| calculate_time() - dongle->release_time
-			< coder->sim->params.dongle_cooldown))
+	while (1)
 	{
-		wake_time = dongle->release_time + coder->sim->params.dongle_cooldown;
-		ts.tv_sec = wake_time / 1000;
-		ts.tv_nsec = (wake_time % 1000) * 1000000;
-		pthread_cond_timedwait(&my_turn->self_cond, &dongle->mutex, &ts);
+		pthread_mutex_lock(&coder->sim->state_mutex);
+		is_running = coder->sim->running;
+		pthread_mutex_unlock(&coder->sim->state_mutex);
+		if (is_running == 0)
+			break ;
+		if (dongle->in_use == 0 && heap_peek(dongle) == my_turn 
+		&& calculate_time() >= (dongle->release_time + coder->sim->params.dongle_cooldown))
+			break ;
+		if (dongle->in_use == 0 && heap_peek(dongle) == my_turn)
+		{
+			wake_time = dongle->release_time + coder->sim->params.dongle_cooldown;
+			ts.tv_sec = wake_time / 1000;
+			ts.tv_nsec = (wake_time % 1000) * 1000000;
+			pthread_cond_timedwait(&my_turn->self_cond, &dongle->mutex, &ts);
+		}
+		else
+			pthread_cond_wait(&my_turn->self_cond, &dongle->mutex);
 	}
 }
 
@@ -89,6 +99,7 @@ thread can be woken up individually.
 int	take_dongle(t_dongle *dongle, t_coder *coder)
 {
 	t_request		my_turn;
+	int				is_running;
 
 	pthread_cond_init(&my_turn.self_cond, NULL);
 	if (coder->sim->params.scheduler == 0)
@@ -99,7 +110,10 @@ int	take_dongle(t_dongle *dongle, t_coder *coder)
 	pthread_mutex_lock(&dongle->mutex);
 	heap_push(dongle, &my_turn);
 	wait_for_dongle(dongle, coder, &my_turn);
-	if (coder->sim->running == 0)
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	is_running = coder->sim->running;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	if (is_running == 0)
 	{
 		heap_remove(dongle, &my_turn);
 		pthread_mutex_unlock(&dongle->mutex);

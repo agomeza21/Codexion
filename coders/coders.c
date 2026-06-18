@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 10:49:30 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/18 16:16:43 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,27 +64,43 @@ to release.
 */
 static int	compile_cycle(t_coder *coder)
 {
+	int is_running;
+
+	pthread_mutex_lock(&coder->sim->state_mutex);
 	if (coder->sim->running == 0)
 	{
+		pthread_mutex_unlock(&coder->sim->state_mutex);
 		release_dongle(coder->left);
 		release_dongle(coder->right);
 		return (0);
 	}
 	coder->last_compile_start = calculate_time();
+	pthread_mutex_unlock(&coder->sim->state_mutex);
 	log_action(coder->sim, coder->id, "is compiling");
-	coder->compile_count++;
 	usleep(coder->sim->params.time_to_compile * 1000);
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	coder->compile_count++;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
 	release_dongle(coder->left);
 	release_dongle(coder->right);
-	if (coder->sim->running == 0)
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	is_running = coder->sim->running;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	if (is_running == 0)
 		return (0);
 	log_action(coder->sim, coder->id, "is debugging");
 	usleep(coder->sim->params.time_to_debug * 1000);
-	if (coder->sim->running == 0)
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	is_running = coder->sim->running;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	if (is_running == 0)
 		return (0);
 	log_action(coder->sim, coder->id, "is refactoring");
 	usleep(coder->sim->params.time_to_refactor * 1000);
-	if (coder->sim->running == 0)
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	is_running = coder->sim->running;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	if (is_running == 0)
 		return (0);
 	return (1);
 }
@@ -100,9 +116,13 @@ static void	*func(void *arg)
 {
 	t_coder		*coder;
 	int			result;
+	int			is_running;
 
 	coder = (t_coder *)arg;
-	while (coder->sim->running == 1)
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	is_running = coder->sim->running;
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	while (is_running == 1)
 	{
 		result = grab_dongles(coder);
 		if (result == 2)
@@ -117,6 +137,9 @@ static void	*func(void *arg)
 		}
 		if (!compile_cycle(coder))
 			return (NULL);
+		pthread_mutex_lock(&coder->sim->state_mutex);
+		is_running = coder->sim->running;
+		pthread_mutex_unlock(&coder->sim->state_mutex);
 	}
 	return (NULL);
 }

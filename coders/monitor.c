@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/16 11:45:50 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/18 15:30:28 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ static int	check_all_done(t_sim *sim)
 
 	all_done = 1;
 	j = 0;
+	pthread_mutex_lock(&sim->state_mutex);
 	while (j < sim->params.number_of_coders)
 	{
 		if (sim->coders[j].compile_count
@@ -65,8 +66,10 @@ static int	check_all_done(t_sim *sim)
 	if (all_done == 1)
 	{
 		sim->running = 0;
+		pthread_mutex_unlock(&sim->state_mutex);
 		return (1);
 	}
+	pthread_mutex_unlock(&sim->state_mutex);
 	return (0);
 }
 
@@ -82,17 +85,20 @@ static int	check_burnout(t_sim *sim)
 	int		i;
 
 	i = 0;
+	pthread_mutex_lock(&sim->state_mutex);
 	while (i < sim->params.number_of_coders)
 	{
 		if (calculate_time() - sim->coders[i].last_compile_start
 			>= sim->params.time_to_burnout)
 		{
-			log_action(sim, sim->coders[i].id, "burned out");
 			sim->running = 0;
+			pthread_mutex_unlock(&sim->state_mutex);
+			log_action(sim, sim->coders[i].id, "burned out");
 			return (1);
 		}
 		i++;
 	}
+	pthread_mutex_unlock(&sim->state_mutex);
 	return (0);
 }
 
@@ -108,17 +114,26 @@ When either condition is detected, wakes up every blocked coder
 void	*monitor_func(void *arg)
 {
 	t_sim	*sim;
+	int		is_running;
 
 	sim = (t_sim *)arg;
-	while (sim->running == 1)
+	pthread_mutex_lock(&sim->state_mutex);
+	is_running = sim->running;
+	pthread_mutex_unlock(&sim->state_mutex);
+	while (is_running == 1)
 	{
 		if (check_burnout(sim) || check_all_done(sim))
 		{
+			pthread_mutex_lock(&sim->state_mutex);
 			sim->running = 0;
+			pthread_mutex_unlock(&sim->state_mutex);
 			wake_all_dongles(sim);
 			return (NULL);
 		}
 		usleep(1000);
+		pthread_mutex_lock(&sim->state_mutex);
+		is_running = sim->running;
+		pthread_mutex_unlock(&sim->state_mutex);
 	}
 	return (NULL);
 }

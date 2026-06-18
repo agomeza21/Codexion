@@ -4,7 +4,7 @@ SRCS = main.c coders.c dongles.c monitor.c utils.c heap.c
 OBJS = $(SRCS:.c=.o)
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread
+CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread
 
 all: $(NAME)
 

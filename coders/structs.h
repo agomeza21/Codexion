@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/16 11:41:39 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/18 15:07:16 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -112,6 +112,7 @@ used as the 0 reference for every log timestamp.
 typedef struct s_sim
 {
 	pthread_mutex_t	log_mutex;
+	pthread_mutex_t	state_mutex;
 	pthread_t		monitor;
 	t_params		params;
 	t_coder			*coders;

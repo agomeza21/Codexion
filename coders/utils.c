@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 15:54:21 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/16 11:07:08 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/18 15:13:21 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ void	cleanup_sim(t_sim *sim)
 
 	i = 0;
 	pthread_mutex_destroy(&sim->log_mutex);
+	pthread_mutex_destroy(&sim->state_mutex);
 	while (i < sim->params.number_of_coders)
 	{
 		free(sim->dongles[i].heap);
@@ -44,6 +45,7 @@ void	setup_sim(t_sim *sim)
 	create_dongles(sim->dongles, sim->params.number_of_coders);
 	sim->running = 1;
 	pthread_mutex_init(&sim->log_mutex, NULL);
+	pthread_mutex_init(&sim->state_mutex, NULL);
 	sim->coders = malloc(sizeof(t_coder) * sim->params.number_of_coders);
 	sim->start_time = calculate_time();
 	init_coders(sim->coders, sim->dongles, sim);
