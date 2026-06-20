@@ -6,12 +6,23 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:48:13 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 00:22:04 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 01:02:06 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
 
+/*
+Called at the start of compile_cycle, AFTER both dongles are held.
+Checks sim->running under state_mutex:
+ - If running == 0 (simulation stopped while waiting for dongles):
+   releases both dongles and returns 1 so compile_cycle aborts.
+ - If running == 1:
+   records last_compile_start = now (resets the burnout clock)
+   and returns 0 so compile_cycle proceeds normally.
+Writing last_compile_start inside state_mutex is required because
+the monitor reads it under the same mutex in check_burnout.
+*/
 int	abort_if_stopped(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->sim->state_mutex);
@@ -27,6 +38,12 @@ int	abort_if_stopped(t_coder *coder)
 	return (0);
 }
 
+/*
+Thread-safe read of sim->running.
+Returns 1 if the simulation is still active, 0 if it has stopped.
+Used after each sleep phase (debug, refactor) to avoid printing
+ogs or starting a new cycle after the simulation has ended.
+*/
 int	still_running(t_coder *coder)
 {
 	int	is_running;
@@ -37,6 +54,15 @@ int	still_running(t_coder *coder)
 	return (is_running);
 }
 
+/*
+Returns 1 if the coder should attempt another compile cycle:
+ - the simulation is still running (running == 1), AND
+ - this coder hasn't yet reached number_of_compiles_required.
+Both fields are read under state_mutex to avoid a race with the
+monitor thread, which writes running and the coder threads which
+write compile_count.
+Used as the condition of the main loop in func().
+*/
 int	should_keep_working(t_coder *coder)
 {
 	int	keep_going;

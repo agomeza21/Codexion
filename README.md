@@ -95,10 +95,16 @@ marked as in use after the simulation ends.
 
 **Starvation prevention**
 Two scheduling policies decide who gets a dongle next when it's released:
-- **FIFO**: requests are served in arrival order (a linked queue per dongle).
+- **FIFO**: requests are served in arrival order. Each request is assigned a
+  priority equal to its arrival timestamp; the min-heap always serves the
+  smallest value first, so the earliest request wins.
 - **EDF**: requests are served by the closest deadline
   (`last_compile_start + time_to_burnout`), so the coder closest to burning
-  out is always prioritized first. This reduces starvation compared to FIFO, though with very tight parameters (where the total cycle time leaves little or no slack before time_to_burnout) a burnout can still occur — EDF minimizes who is left waiting longest, but cannot create time that the parameters don't allow.
+  out is always prioritized first. This reduces starvation compared to FIFO,
+  though with very tight parameters (where the total cycle time leaves little
+  or no slack before `time_to_burnout`) a burnout can still occur — EDF
+  minimizes who is left waiting longest, but cannot create time that the
+  parameters don't allow.
 
 **Dongle cooldown**
 After a dongle is released, it cannot be taken again until
@@ -113,9 +119,9 @@ A dedicated monitor thread checks every millisecond whether any coder has
 exceeded `time_to_burnout` without compiling, or whether every coder has
 reached `number_of_compiles_required`. The 1ms polling interval guarantees
 the burnout message is logged within 10ms of the real event, as required.
-When the monitor decides to stop the simulation, it broadcasts to every
-dongle's waiting queue so that no coder thread is left blocked forever in
-`pthread_cond_timedwait`.
+When the monitor decides to stop the simulation, it signals every pending
+request on every dongle's heap so that no coder thread is left blocked forever
+in `pthread_cond_timedwait`.
 
 **Log serialization**
 All log lines are printed through a single function protected by a mutex
@@ -133,39 +139,47 @@ deadlock, no crash.
 
 **`pthread_mutex_t` per dongle**
 Each dongle has its own mutex protecting its state (`in_use`, `release_time`,
-and its waiting queue). Any thread reading or modifying a dongle's state must
+and its min-heap). Any thread reading or modifying a dongle's state must
 hold this mutex first, preventing race conditions such as two coders both
 believing they successfully took the same dongle.
 
-**Per-request `pthread_cond_t` (custom waiting heap)**
+**Per-request `pthread_cond_t` (min-heap of waiting requests)**
 Instead of a single condition variable per dongle, each waiting request
 (`t_request`) carries its **own** `pthread_cond_t`, created on the waiting
 thread's stack inside `take_dongle`. This allows the dongle to wake up a
 **specific** coder (via `pthread_cond_signal` on that request's condition)
 rather than waking everyone and letting them race — which is what makes a
 true FIFO/EDF ordering possible: the dongle is only handed to the request at
-the front of the heap.
+the top of the min-heap.
 
-**Queue-based scheduling (`enqueue` / `enqueue_edf` / `dequeue`)**
-When a coder calls `take_dongle`, it builds a `t_request` with its arrival
-timestamp and computed deadline, and enqueues it:
-- FIFO appends it to the end of a linked list.
-- EDF inserts it in sorted order by deadline (closest deadline first).
+**Priority-based scheduling with a min-heap (`heap_push` / `heap_pop` / `heap_remove`)**
+When a coder calls `take_dongle`, it builds a `t_request` with a computed
+priority and pushes it onto the dongle's min-heap:
+- **FIFO**: priority = arrival timestamp (earlier = smaller = first).
+- **EDF**: priority = `last_compile_start + time_to_burnout` (sooner deadline
+  = smaller = first).
 
-The coder then waits (`pthread_cond_timedwait`) until it is at the front of
-the queue, the dongle is free, and the cooldown has elapsed. `release_dongle`
-signals only the front of the queue, handing off the dongle to the correct
-coder according to the active scheduler.
+The heap always keeps the smallest priority at position 0. The coder then
+waits (`pthread_cond_timedwait`) on its own condition
+until it reaches the top of the heap, the dongle is free, and the cooldown
+has elapsed. `release_dongle` signals only the request at heap[0], handing
+off the dongle to the correct coder according to the active scheduler.
 
 **`running` flag and `wake_all_dongles`**
 `sim->running` is a shared flag (1 while active, 0 once the monitor decides
 to stop). It is read by every coder thread before/after each phase. Because
 a coder might be asleep in `pthread_cond_timedwait` when `running` is set to
 0, the monitor calls `wake_all_dongles`, which locks each dongle's mutex and
-signals every pending request — guaranteeing every thread wakes up, sees
-`running == 0`, and exits cleanly. This is a textbook example of why
+signals every pending request in its heap — guaranteeing every thread wakes
+up, sees `running == 0`, and exits cleanly. This is a textbook example of why
 condition variables must always be checked in a `while` loop: a wake-up does
 not guarantee the awaited condition is true, only that it's worth re-checking.
+
+**`state_mutex`**
+A single mutex protects all shared mutable state that is not dongle-specific:
+`sim->running`, each coder's `compile_count`, and each coder's
+`last_compile_start`. Both the monitor thread and the coder threads acquire
+this mutex before reading or writing any of these fields.
 
 **`log_mutex`**
 A single mutex serializes all calls to `log_action`, ensuring thread-safe,
@@ -194,8 +208,7 @@ following the guidelines in the subject:
   (circular wait on dongles), missed wake-ups after a dongle release during
   cooldown, and a race condition where a coder could start (and log) an
   extra compile cycle after the simulation should have stopped.
-- **Documentation**: drafting and translating the in-code comments and this
-  README.
+- **Documentation**: drafting this README.
 
 All AI-suggested code was written, tested, and understood step by step by
 the author, with every concurrency bug reproduced and explained before being

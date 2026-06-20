@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:29:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/12 10:43:33 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 00:38:05 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ int	validate_args(char **argv)
 	}
 	if (strcmp(argv[8], "fifo") != 0 && strcmp(argv[8], "edf") != 0)
 	{
-		printf("ERROR: invalid scheduer\n");
+		printf("ERROR: invalid scheduler\n");
 		return (1);
 	}
 	return (0);

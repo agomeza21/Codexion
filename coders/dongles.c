@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/20 23:28:41 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 01:09:55 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,11 +126,13 @@ int	take_dongle(t_dongle *dongle, t_coder *coder)
 
 /*
 Initializes every dongle to its starting state before any thread
-runs: marked as free, with release_time=0 so the first cooldown
-check always passes, and an empty heap.
-Also allocates the heap array and initializes each dongle's mutex,
-which protects in_use, release_time and the heap from concurrent
-access by multiple coder threads..
+runs: marked as free, with release_time=0 (so the first cooldown
+check always passes immediately), and an empty heap.
+Allocates the min-heap array and for each dongle (max size: n, since
+at most one request per coder can wait on a single dongle at once)
+and exits with an error if malloc fails.
+Initializes each dongle's mutex, which protects in_use,
+release_time and the heap array from concurrent access.
 */
 void	create_dongles(t_dongle *dongles, int n)
 {
@@ -142,6 +144,11 @@ void	create_dongles(t_dongle *dongles, int n)
 		dongles[i].in_use = 0;
 		dongles[i].release_time = 0;
 		dongles[i].heap = malloc(sizeof(t_request *) * n);
+		if (!dongles[i].heap)
+		{
+			printf("ERROR: malloc failed\n");
+			exit(1);
+		}
 		dongles[i].heap_size = 0;
 		pthread_mutex_init(&dongles[i].mutex, NULL);
 		i++;

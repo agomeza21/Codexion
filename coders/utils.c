@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 15:54:21 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/18 15:13:21 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 00:48:47 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,11 +42,22 @@ Called before launching any thread.
 void	setup_sim(t_sim *sim)
 {
 	sim->dongles = malloc(sizeof(t_dongle) * sim->params.number_of_coders);
+	if (!sim->dongles)
+	{
+		printf("ERROR: malloc failed\n");
+		exit(1);
+	}
 	create_dongles(sim->dongles, sim->params.number_of_coders);
 	sim->running = 1;
 	pthread_mutex_init(&sim->log_mutex, NULL);
 	pthread_mutex_init(&sim->state_mutex, NULL);
 	sim->coders = malloc(sizeof(t_coder) * sim->params.number_of_coders);
+	if (!sim->coders)
+	{
+		free(sim->dongles);
+		printf("ERROR: malloc failed\n");
+		exit(1);
+	}
 	sim->start_time = calculate_time();
 	init_coders(sim->coders, sim->dongles, sim);
 }
