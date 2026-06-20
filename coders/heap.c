@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/12 10:28:07 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/16 12:09:34 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/20 22:42:57 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ static void	sift_down(t_dongle *dongle, int i)
 {
 	int			smallest;
 	t_request	*tmp;
-	
+
 	while (2 * i + 1 < dongle->heap_size)
 	{
 		smallest = 2 * i + 1;
@@ -111,8 +111,8 @@ calling sift_up or sift_down as needed.
 */
 void	heap_remove(t_dongle *dongle, t_request *req)
 {
-	int 		i;
-	int			parent;
+	int	i;
+	int	parent;
 
 	i = 0;
 	while (i < dongle->heap_size && dongle->heap[i] != req)

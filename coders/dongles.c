@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/18 15:54:25 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/20 23:28:41 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,12 +68,13 @@ static void	wait_for_dongle(t_dongle *dongle, t_coder *coder,
 		pthread_mutex_unlock(&coder->sim->state_mutex);
 		if (is_running == 0)
 			break ;
-		if (dongle->in_use == 0 && heap_peek(dongle) == my_turn 
-		&& calculate_time() >= (dongle->release_time + coder->sim->params.dongle_cooldown))
+		if (is_my_turn(dongle, my_turn) && calculate_time()
+			>= (dongle->release_time + coder->sim->params.dongle_cooldown))
 			break ;
-		if (dongle->in_use == 0 && heap_peek(dongle) == my_turn)
+		if (is_my_turn(dongle, my_turn))
 		{
-			wake_time = dongle->release_time + coder->sim->params.dongle_cooldown;
+			wake_time = dongle->release_time
+				+ coder->sim->params.dongle_cooldown;
 			ts.tv_sec = wake_time / 1000;
 			ts.tv_nsec = (wake_time % 1000) * 1000000;
 			pthread_cond_timedwait(&my_turn->self_cond, &dongle->mutex, &ts);
@@ -102,11 +103,7 @@ int	take_dongle(t_dongle *dongle, t_coder *coder)
 	int				is_running;
 
 	pthread_cond_init(&my_turn.self_cond, NULL);
-	if (coder->sim->params.scheduler == 0)
-		my_turn.priority = calculate_time();
-	else
-		my_turn.priority = coder->last_compile_start 
-			+ coder->sim->params.time_to_burnout;
+	my_turn.priority = compute_priority(coder);
 	pthread_mutex_lock(&dongle->mutex);
 	heap_push(dongle, &my_turn);
 	wait_for_dongle(dongle, coder, &my_turn);

@@ -1,10 +1,10 @@
 NAME = codexion
 
-SRCS = main.c coders.c dongles.c monitor.c utils.c heap.c
+SRCS = main.c coders.c dongles.c monitor.c utils.c heap.c coders_aux.c dongles_aux.c
 OBJS = $(SRCS:.c=.o)
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread -fsanitize=thread
+CFLAGS = -Wall -Wextra -Werror -pthread
 
 all: $(NAME)
 
