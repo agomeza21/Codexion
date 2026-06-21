@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 00:22:51 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 13:46:23 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -122,10 +122,11 @@ typedef struct s_sim
 }	t_sim;
 
 void		init_coders(t_coder *coders, t_dongle *dongles, t_sim *sim);
+void		free_dongles_until(t_dongle *dongles, int count);
 int			is_my_turn(t_dongle *dongle, t_request *my_turn);
+void		heap_remove(t_dongle *dongle, t_request *req);
 int			take_dongle(t_dongle *dongle, t_coder *coder);
 void		log_action(t_sim *sim, int id, char *action);
-void		heap_remove(t_dongle *dongle, t_request *req);
 void		heap_push(t_dongle *dongle, t_request *req);
 void		start_coders(t_coder *coders, t_sim *sim);
 void		create_dongles(t_dongle *dongles, int n);

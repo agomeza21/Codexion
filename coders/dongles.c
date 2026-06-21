@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/29 14:27:08 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 01:09:55 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 13:47:18 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,6 +146,7 @@ void	create_dongles(t_dongle *dongles, int n)
 		dongles[i].heap = malloc(sizeof(t_request *) * n);
 		if (!dongles[i].heap)
 		{
+			free_dongles_until(dongles, i);
 			printf("ERROR: malloc failed\n");
 			exit(1);
 		}

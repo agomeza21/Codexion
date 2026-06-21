@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 23:19:58 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 01:06:42 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 13:45:30 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,4 +57,17 @@ long	compute_priority(t_coder *coder)
 	deadline = coder->last_compile_start + coder->sim->params.time_to_burnout;
 	pthread_mutex_unlock(&coder->sim->state_mutex);
 	return (deadline);
+}
+
+void	free_dongles_until(t_dongle *dongles, int count)
+{
+	int	i;
+
+	i = 0;
+	while (i < count)
+	{
+		free(dongles[i].heap);
+		pthread_mutex_destroy(&dongles[i].mutex);
+		i++;
+	}
 }

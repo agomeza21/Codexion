@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:48:13 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 01:02:06 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/21 13:59:25 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ int	abort_if_stopped(t_coder *coder)
 Thread-safe read of sim->running.
 Returns 1 if the simulation is still active, 0 if it has stopped.
 Used after each sleep phase (debug, refactor) to avoid printing
-ogs or starting a new cycle after the simulation has ended.
+logs or starting a new cycle after the simulation has ended.
 */
 int	still_running(t_coder *coder)
 {
