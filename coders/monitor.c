@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/03 12:50:25 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/18 15:30:28 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/29 01:13:51 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -83,22 +83,28 @@ the others).
 static int	check_burnout(t_sim *sim)
 {
 	int		i;
+	int		burned_id;
 
 	i = 0;
+	burned_id = -1;
 	pthread_mutex_lock(&sim->state_mutex);
 	while (i < sim->params.number_of_coders)
 	{
 		if (calculate_time() - sim->coders[i].last_compile_start
 			>= sim->params.time_to_burnout)
 		{
+			burned_id = sim->coders[i].id;
 			sim->running = 0;
-			pthread_mutex_unlock(&sim->state_mutex);
-			log_action(sim, sim->coders[i].id, "burned out");
-			return (1);
+			break ;
 		}
 		i++;
 	}
 	pthread_mutex_unlock(&sim->state_mutex);
+	if (burned_id != -1)
+	{
+		log_action(sim, burned_id, "burned out");
+		return (1);
+	}
 	return (0);
 }
 
