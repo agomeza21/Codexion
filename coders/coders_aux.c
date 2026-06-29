@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:48:13 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/29 10:12:26 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/29 10:25:08 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,9 +23,9 @@ int	reached_compile_limit(t_coder *coder)
 
 	pthread_mutex_lock(&coder->sim->state_mutex);
 	reached = (coder->compile_count
-		>= coder->sim->params.number_of_compiles_required);
+			>= coder->sim->params.number_of_compiles_required);
 	pthread_mutex_unlock(&coder->sim->state_mutex);
-	return  (reached);
+	return (reached);
 }
 
 /*
