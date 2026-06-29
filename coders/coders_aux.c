@@ -6,11 +6,27 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/20 22:48:13 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 13:59:25 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/29 10:12:26 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "structs.h"
+
+/*
+Returns 1 if this coder has already reached number_of_compiles_required.
+Called after the last compile to avoid printing debug/refactor logs
+once the simulation is effectively  done foe this coder.
+*/
+int	reached_compile_limit(t_coder *coder)
+{
+	int	reached;
+
+	pthread_mutex_lock(&coder->sim->state_mutex);
+	reached = (coder->compile_count
+		>= coder->sim->params.number_of_compiles_required);
+	pthread_mutex_unlock(&coder->sim->state_mutex);
+	return  (reached);
+}
 
 /*
 Called at the start of compile_cycle, AFTER both dongles are held.

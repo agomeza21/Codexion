@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 15:32:42 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/21 13:46:23 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/29 10:14:18 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,7 @@ void		log_action(t_sim *sim, int id, char *action);
 void		heap_push(t_dongle *dongle, t_request *req);
 void		start_coders(t_coder *coders, t_sim *sim);
 void		create_dongles(t_dongle *dongles, int n);
+int			reached_compile_limit(t_coder *coder);
 int			should_keep_working(t_coder *coder);
 void		release_dongle(t_dongle *dongle);
 int			abort_if_stopped(t_coder *coder);

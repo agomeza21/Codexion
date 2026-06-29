@@ -6,7 +6,7 @@
 /*   By: agomez-a <agomez-a@student.42urduliz.co    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 18:51:51 by agomez-a          #+#    #+#             */
-/*   Updated: 2026/06/20 23:03:10 by agomez-a         ###   ########.fr       */
+/*   Updated: 2026/06/29 10:13:31 by agomez-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -73,7 +73,7 @@ static int	compile_cycle(t_coder *coder)
 	pthread_mutex_unlock(&coder->sim->state_mutex);
 	release_dongle(coder->left);
 	release_dongle(coder->right);
-	if (!still_running(coder))
+	if (!still_running(coder) || reached_compile_limit(coder))
 		return (0);
 	log_action(coder->sim, coder->id, "is debugging");
 	usleep(coder->sim->params.time_to_debug * 1000);
